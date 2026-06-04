@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dreamcard 🌙</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a1a; color: #e0d8ff; font-family: sans-serif; min-height: 100vh; }
+    .header { text-align: center; padding: 2rem 1rem 1rem; }
+    .header h1 { font-size: 2rem; color: #c4b5fd; letter-spacing: 2px; }
+    .header p { color: #6060a0; margin-top: 0.5rem; }
+    .container { max-width: 600px; margin: 0 auto; padding: 1rem; }
+    .card { background: #12122a; border: 1px solid #2a2a4a; border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; }
+    label { font-size: 12px; color: #6060a0; display: block; margin-bottom: 6px; }
+    textarea { width: 100%; background: #0a0a1a; border: 1px solid #2a2a4a; border-radius: 8px; color: #e0d8ff; padding: 10px; font-size: 14px; min-height: 100px; resize: none; font-family: sans-serif; }
+    .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+    input { width: 100%; background: #0a0a1a; border: 1px solid #2a2a4a; border-radius: 8px; color: #e0d8ff; padding: 8px 10px; font-size: 14px; }
+    .styles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 1rem; }
+    .style-btn { background: #0a0a1a; border: 1px solid #2a2a4a; border-radius: 8px; color: #6060a0; padding: 10px 4px; cursor: pointer; font-size: 11px; text-align: center; }
+    .style-btn.active { border-color: #7F77DD; color: #c4b5fd; background: #1a1a3a; }
+    .style-btn .em { font-size: 20px; display: block; margin-bottom: 4px; }
+    .btn { width: 100%; padding: 14px; background: #534AB7; color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; }
+    .result { display: none; }
+    .result.show { display: block; }
+    .dream-card { background: #0a0a1a; border-radius: 12px; padding: 1.2rem; display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; min-height: 220px; }
+    .art-zone { background: linear-gradient(135deg, #1a0533, #0d1f4a); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; }
+    .art-glow { width: 60px; height: 60px; border-radius: 50%; background: #7F77DD; opacity: 0.7; }
+    .info-zone { display: flex; flex-direction: column; justify-content: space-between; }
+    .dream-num { font-size: 22px; color: #e0d8ff; font-weight: bold; }
+    .dream-title { font-size: 13px; color: #c4b5fd; margin: 4px 0; }
+    .dream-date { font-size: 11px; color: #6060a0; }
+    .dream-desc { font-size: 10px; color: #6060a0; border-top: 1px solid #2a2a4a; padding-top: 8px; margin-top: 8px; line-height: 1.5; }
+    .download-btn { width: 100%; padding: 10px; background: transparent; border: 1px solid #7F77DD; color: #c4b5fd; border-radius: 8px; font-size: 13px; cursor: pointer; margin-top: 10px; }
+    .holes { display: flex; flex-direction: column; gap: 16px; align-items: center; padding: 4px 0; }
+    .hole { width: 12px; height: 12px; border-radius: 50%; background: #12122a; border: 1px solid #2a2a4a; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🌙 Dreamcard</h1>
+    <p>Твой сон — как искусство</p>
+  </div>
+  <div class="container">
+    <div class="card">
+      <label>Опиши свой сон</label>
+      <textarea id="dreamText" placeholder="Мне снилось что я лечу над фиолетовым городом..."></textarea>
+    </div>
+    <div class="row">
+      <div><label>Номер сна</label><input type="number" id="dreamNum" value="1" min="1"></div>
+      <div><label>Дата</label><input type="date" id="dreamDate"></div>
+      <div><label>Название</label><input type="text" id="dreamTitle" placeholder="Мой сон"></div>
+    </div>
+    <div class="card">
+      <label>Стиль арта</label>
+      <div class="styles">
+        <div class="style-btn active" onclick="pick(this,'Аниме')"><span class="em">🌸</span>Аниме</div>
+        <div class="style-btn" onclick="pick(this,'Артхаус')"><span class="em">🎨</span>Артхаус</div>
+        <div class="style-btn" onclick="pick(this,'Киберпанк')"><span class="em">⚡</span>Киберпанк</div>
+        <div class="style-btn" onclick="pick(this,'Акварель')"><span class="em">💧</span>Акварель</div>
+        <div class="style-btn" onclick="pick(this,'Сюрреализм')"><span class="em">🌀</span>Сюрреализм</div>
+      </div>
+      <button class="btn" onclick="generate()">✨ Сгенерировать карточку</button>
+    </div>
+    <div class="result" id="result">
+      <div class="card">
+        <label>Твоя карточка</label>
+        <div style="display:flex;gap:8px;align-items:stretch;">
+          <div class="holes"><div class="hole"></div><div class="hole"></div></div>
+          <div class="dream-card" style="flex:1;">
+            <div class="art-zone">
+              <div class="art-glow"></div>
+              <div style="font-size:11px;color:#7F77DD;" id="styleOut">Аниме</div>
+              <div style="font-size:10px;color:#3a3a6a;">AI-арт по сну</div>
+            </div>
+            <div class="info-zone">
+              <div>
+                <div class="dream-num" id="numOut">Сон #1</div>
+                <div class="dream-title" id="titleOut">Мой сон</div>
+                <div class="dream-date" id="dateOut">—</div>
+              </div>
+              <div class="dream-desc" id="descOut"></div>
+            </div>
+          </div>
+        </div>
+        <button class="download-btn">⬇ Скачать PNG 300dpi</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    let style = 'Аниме';
+    document.getElementById('dreamDate').value = new Date().toISOString().split('T')[0];
+    function pick(el, s) {
+      document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      style = s;
+    }
+    function generate() {
+      const num = document.getElementById('dreamNum').value || '1';
+      const title = document.getElementById('dreamTitle').value || 'Без названия';
+      const date = document.getElementById('dreamDate').value;
+      const desc = document.getElementById('dreamText').value || '';
+      const d = date ? new Date(date).toLocaleDateString('ru-RU') : '—';
+      document.getElementById('numOut').textContent = 'Сон #' + num;
+      document.getElementById('titleOut').textContent = title;
+      document.getElementById('dateOut').textContent = '📅 ' + d;
+      document.getElementById('styleOut').textContent = style;
+      document.getElementById('descOut').textContent = desc.length > 150 ? desc.slice(0,150)+'...' : desc;
+      document.getElementById('result').classList.add('show');
+      document.getElementById('result').scrollIntoView({behavior:'smooth'});
+    }
+  </script>
+</body>
+</html>
