@@ -1,115 +1,147 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dreamcard 🌙</title>
-  <link rel="manifest" href="manifest.json">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a1a; color: #e0d8ff; font-family: sans-serif; min-height: 100vh; }
-    .header { text-align: center; padding: 2rem 1rem 1rem; }
-    .header h1 { font-size: 2rem; color: #c4b5fd; letter-spacing: 2px; }
-    .header p { color: #6060a0; margin-top: 0.5rem; }
-    .container { max-width: 600px; margin: 0 auto; padding: 1rem; }
-    .card { background: #12122a; border: 1px solid #2a2a4a; border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; }
-    label { font-size: 12px; color: #6060a0; display: block; margin-bottom: 6px; }
-    textarea { width: 100%; background: #0a0a1a; border: 1px solid #2a2a4a; border-radius: 8px; color: #e0d8ff; padding: 10px; font-size: 14px; min-height: 100px; resize: none; font-family: sans-serif; }
-    .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
-    input { width: 100%; background: #0a0a1a; border: 1px solid #2a2a4a; border-radius: 8px; color: #e0d8ff; padding: 8px 10px; font-size: 14px; }
-    .styles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 1rem; }
-    .style-btn { background: #0a0a1a; border: 1px solid #2a2a4a; border-radius: 8px; color: #6060a0; padding: 10px 4px; cursor: pointer; font-size: 11px; text-align: center; }
-    .style-btn.active { border-color: #7F77DD; color: #c4b5fd; background: #1a1a3a; }
-    .style-btn .em { font-size: 20px; display: block; margin-bottom: 4px; }
-    .btn { width: 100%; padding: 14px; background: #534AB7; color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; }
-    .result { display: none; }
-    .result.show { display: block; }
-    .dream-card { background: #0a0a1a; border-radius: 12px; padding: 1.2rem; display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; min-height: 220px; }
-    .art-zone { background: linear-gradient(135deg, #1a0533, #0d1f4a); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; }
-    .art-glow { width: 60px; height: 60px; border-radius: 50%; background: #7F77DD; opacity: 0.7; }
-    .info-zone { display: flex; flex-direction: column; justify-content: space-between; }
-    .dream-num { font-size: 22px; color: #e0d8ff; font-weight: bold; }
-    .dream-title { font-size: 13px; color: #c4b5fd; margin: 4px 0; }
-    .dream-date { font-size: 11px; color: #6060a0; }
-    .dream-desc { font-size: 10px; color: #6060a0; border-top: 1px solid #2a2a4a; padding-top: 8px; margin-top: 8px; line-height: 1.5; }
-    .download-btn { width: 100%; padding: 10px; background: transparent; border: 1px solid #7F77DD; color: #c4b5fd; border-radius: 8px; font-size: 13px; cursor: pointer; margin-top: 10px; }
-    .holes { display: flex; flex-direction: column; gap: 16px; align-items: center; padding: 4px 0; }
-    .hole { width: 12px; height: 12px; border-radius: 50%; background: #12122a; border: 1px solid #2a2a4a; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dreamcard — AI арт из твоих снов</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#05050f;min-height:100vh;font-family:'Inter',sans-serif;color:#fff;position:relative;overflow-x:hidden}
+.blob1{position:fixed;width:400px;height:400px;border-radius:50%;background:#5B21B6;opacity:0.12;filter:blur(80px);top:-100px;left:-100px;pointer-events:none;z-index:0}
+.blob2{position:fixed;width:350px;height:350px;border-radius:50%;background:#7C3AED;opacity:0.1;filter:blur(70px);top:300px;right:-80px;pointer-events:none;z-index:0}
+.blob3{position:fixed;width:300px;height:300px;border-radius:50%;background:#4F46E5;opacity:0.08;filter:blur(60px);bottom:100px;left:40%;pointer-events:none;z-index:0}
+.glass{background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:20px}
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid rgba(255,255,255,0.06);position:relative;z-index:10}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:#a78bfa;box-shadow:0 0 10px #a78bfa}
+.logo-text{font-size:15px;font-weight:500;letter-spacing:3px;color:#e2d9f3}
+.nav-btn{background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.3);color:#a78bfa;padding:7px 16px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif}
+.hero{text-align:center;padding:40px 24px 28px;position:relative;z-index:2}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);color:#a78bfa;font-size:11px;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.5px}
+.hero h1{font-size:28px;font-weight:300;color:#f0ebff;line-height:1.4;margin-bottom:10px}
+.hero h1 b{font-weight:600;color:#c4b5fd}
+.hero p{font-size:13px;color:rgba(255,255,255,0.35);max-width:380px;margin:0 auto}
+.neon-line{width:60px;height:1px;background:linear-gradient(90deg,transparent,#a78bfa,transparent);margin:20px auto 0}
+.main{padding:0 20px 32px;max-width:640px;margin:0 auto;position:relative;z-index:2}
+.card{padding:18px;margin-bottom:12px}
+.lbl{font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+textarea{width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;color:rgba(255,255,255,0.8);padding:12px;font-size:13px;min-height:90px;resize:none;font-family:'Inter',sans-serif;line-height:1.6;outline:none}
+textarea:focus{border-color:rgba(167,139,250,0.4)}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+input{width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;color:rgba(255,255,255,0.8);padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;outline:none}
+input:focus{border-color:rgba(167,139,250,0.4)}
+.styles{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
+.sty{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px 4px;cursor:pointer;text-align:center;transition:all 0.2s}
+.sty.on{border-color:rgba(167,139,250,0.5);background:rgba(167,139,250,0.08);box-shadow:0 0 20px rgba(167,139,250,0.1)}
+.sty-ic{font-size:20px;margin-bottom:4px}
+.sty-nm{font-size:10px;color:rgba(255,255,255,0.3)}
+.sty.on .sty-nm{color:#a78bfa}
+.btn{width:100%;padding:14px;background:linear-gradient(135deg,rgba(99,102,241,0.8),rgba(139,92,246,0.8));color:#fff;border:1px solid rgba(167,139,250,0.3);border-radius:12px;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;letter-spacing:0.5px}
+.result{display:none}
+.result.show{display:block}
+.preview{display:flex;gap:8px;align-items:stretch}
+.holes{display:flex;flex-direction:column;gap:16px;justify-content:center}
+.hole{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1)}
+.pcard{flex:1;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:14px;display:grid;grid-template-columns:3fr 2fr;min-height:180px;overflow:hidden}
+.art{background:linear-gradient(135deg,rgba(91,33,182,0.4),rgba(67,56,202,0.3),rgba(16,185,129,0.15));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-right:1px solid rgba(255,255,255,0.05)}
+.art-orb{width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,0.6),rgba(99,102,241,0.2));box-shadow:0 0 30px rgba(139,92,246,0.3)}
+.art-tag{font-size:9px;color:rgba(167,139,250,0.7);letter-spacing:1.5px;text-transform:uppercase}
+.info{padding:14px;display:flex;flex-direction:column;justify-content:space-between}
+.sno{font-size:9px;color:rgba(255,255,255,0.2);letter-spacing:2px;text-transform:uppercase}
+.stitle{font-size:14px;color:#f0ebff;font-weight:500;margin:5px 0}
+.sdate{font-size:10px;color:rgba(255,255,255,0.2)}
+.sdesc{font-size:9px;color:rgba(255,255,255,0.2);border-top:1px solid rgba(255,255,255,0.05);padding-top:8px;margin-top:8px;line-height:1.6}
+.dl{width:100%;padding:10px;background:transparent;border:1px solid rgba(167,139,250,0.2);color:rgba(167,139,250,0.7);border-radius:10px;font-size:11px;cursor:pointer;margin-top:10px;font-family:'Inter',sans-serif}
+.trust{display:flex;justify-content:center;gap:20px;padding:16px 0;border-top:1px solid rgba(255,255,255,0.05);margin-top:4px;flex-wrap:wrap}
+.ti{font-size:10px;color:rgba(255,255,255,0.2);display:flex;align-items:center;gap:4px}
+</style>
 </head>
 <body>
-  <div class="header">
-    <h1>🌙 Dreamcard</h1>
-    <p>Твой сон — как искусство</p>
+<div class="blob1"></div>
+<div class="blob2"></div>
+<div class="blob3"></div>
+<nav>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <div class="logo-text">DREAMCARD</div>
   </div>
-  <div class="container">
-    <div class="card">
-      <label>Опиши свой сон</label>
-      <textarea id="dreamText" placeholder="Мне снилось что я лечу над фиолетовым городом..."></textarea>
+  <button class="nav-btn">Войти →</button>
+</nav>
+<div class="hero">
+  <div class="hero-tag">✦ AI · Арт из твоих снов</div>
+  <h1>Каждый сон —<br><b>произведение искусства</b></h1>
+  <p>Опиши сон и получи карточку с AI-артом готовую к печати</p>
+  <div class="neon-line"></div>
+</div>
+<div class="main">
+  <div class="card glass">
+    <div class="lbl">Опиши свой сон</div>
+    <textarea id="dt" placeholder="Мне снилось что я лечу над фиолетовым городом..."></textarea>
+  </div>
+  <div class="row">
+    <div><div class="lbl">Сон №</div><input type="number" id="dn" value="1" min="1"></div>
+    <div><div class="lbl">Дата</div><input type="date" id="dd"></div>
+    <div><div class="lbl">Название</div><input type="text" id="dti" placeholder="Мой сон"></div>
+  </div>
+  <div class="card glass">
+    <div class="lbl">Стиль арта</div>
+    <div class="styles">
+      <div class="sty on" onclick="pick(this,'Аниме')"><div class="sty-ic">🌸</div><div class="sty-nm">Аниме</div></div>
+      <div class="sty" onclick="pick(this,'Артхаус')"><div class="sty-ic">🎨</div><div class="sty-nm">Артхаус</div></div>
+      <div class="sty" onclick="pick(this,'Киберпанк')"><div class="sty-ic">⚡</div><div class="sty-nm">Киберпанк</div></div>
+      <div class="sty" onclick="pick(this,'Акварель')"><div class="sty-ic">💧</div><div class="sty-nm">Акварель</div></div>
+      <div class="sty" onclick="pick(this,'Сюрреализм')"><div class="sty-ic">🌀</div><div class="sty-nm">Сюрреализм</div></div>
     </div>
-    <div class="row">
-      <div><label>Номер сна</label><input type="number" id="dreamNum" value="1" min="1"></div>
-      <div><label>Дата</label><input type="date" id="dreamDate"></div>
-      <div><label>Название</label><input type="text" id="dreamTitle" placeholder="Мой сон"></div>
-    </div>
-    <div class="card">
-      <label>Стиль арта</label>
-      <div class="styles">
-        <div class="style-btn active" onclick="pick(this,'Аниме')"><span class="em">🌸</span>Аниме</div>
-        <div class="style-btn" onclick="pick(this,'Артхаус')"><span class="em">🎨</span>Артхаус</div>
-        <div class="style-btn" onclick="pick(this,'Киберпанк')"><span class="em">⚡</span>Киберпанк</div>
-        <div class="style-btn" onclick="pick(this,'Акварель')"><span class="em">💧</span>Акварель</div>
-        <div class="style-btn" onclick="pick(this,'Сюрреализм')"><span class="em">🌀</span>Сюрреализм</div>
-      </div>
-      <button class="btn" onclick="generate()">✨ Сгенерировать карточку</button>
-    </div>
-    <div class="result" id="result">
-      <div class="card">
-        <label>Твоя карточка</label>
-        <div style="display:flex;gap:8px;align-items:stretch;">
-          <div class="holes"><div class="hole"></div><div class="hole"></div></div>
-          <div class="dream-card" style="flex:1;">
-            <div class="art-zone">
-              <div class="art-glow"></div>
-              <div style="font-size:11px;color:#7F77DD;" id="styleOut">Аниме</div>
-              <div style="font-size:10px;color:#3a3a6a;">AI-арт по сну</div>
-            </div>
-            <div class="info-zone">
-              <div>
-                <div class="dream-num" id="numOut">Сон #1</div>
-                <div class="dream-title" id="titleOut">Мой сон</div>
-                <div class="dream-date" id="dateOut">—</div>
-              </div>
-              <div class="dream-desc" id="descOut"></div>
-            </div>
-          </div>
+    <button class="btn" onclick="gen()">✦ Создать карточку сна</button>
+  </div>
+  <div class="result card glass" id="res">
+    <div class="lbl">Твоя карточка</div>
+    <div class="preview">
+      <div class="holes"><div class="hole"></div><div class="hole"></div></div>
+      <div class="pcard">
+        <div class="art">
+          <div class="art-orb"></div>
+          <div class="art-tag" id="so">Аниме · AI</div>
         </div>
-        <button class="download-btn">⬇ Скачать PNG 300dpi</button>
+        <div class="info">
+          <div>
+            <div class="sno" id="sno">СОН · 001</div>
+            <div class="stitle" id="sti">Мой сон</div>
+            <div class="sdate" id="sda">—</div>
+          </div>
+          <div class="sdesc" id="sde"></div>
+        </div>
       </div>
     </div>
+    <button class="dl">⬇ Скачать · PNG 300dpi · для печати</button>
   </div>
-  <script>
-    let style = 'Аниме';
-    document.getElementById('dreamDate').value = new Date().toISOString().split('T')[0];
-    function pick(el, s) {
-      document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
-      el.classList.add('active');
-      style = s;
-    }
-    function generate() {
-      const num = document.getElementById('dreamNum').value || '1';
-      const title = document.getElementById('dreamTitle').value || 'Без названия';
-      const date = document.getElementById('dreamDate').value;
-      const desc = document.getElementById('dreamText').value || '';
-      const d = date ? new Date(date).toLocaleDateString('ru-RU') : '—';
-      document.getElementById('numOut').textContent = 'Сон #' + num;
-      document.getElementById('titleOut').textContent = title;
-      document.getElementById('dateOut').textContent = '📅 ' + d;
-      document.getElementById('styleOut').textContent = style;
-      document.getElementById('descOut').textContent = desc.length > 150 ? desc.slice(0,150)+'...' : desc;
-      document.getElementById('result').classList.add('show');
-      document.getElementById('result').scrollIntoView({behavior:'smooth'});
-    }
-  </script>
+  <div class="trust">
+    <div class="ti">🔒 Безопасно</div>
+    <div class="ti">↩ Возврат средств</div>
+    <div class="ti">🌍 Все языки</div>
+    <div class="ti">🖨 Готово к печати</div>
+  </div>
+</div>
+<script>
+let style='Аниме';
+document.getElementById('dd').value=new Date().toISOString().split('T')[0];
+function pick(el,s){document.querySelectorAll('.sty').forEach(b=>b.classList.remove('on'));el.classList.add('on');style=s;}
+function gen(){
+  const n=document.getElementById('dn').value||'1';
+  const t=document.getElementById('dti').value||'Без названия';
+  const d=document.getElementById('dd').value;
+  const desc=document.getElementById('dt').value||'';
+  const ds=d?new Date(d).toLocaleDateString('ru-RU'):'—';
+  document.getElementById('sno').textContent='СОН · '+String(n).padStart(3,'0');
+  document.getElementById('sti').textContent=t;
+  document.getElementById('sda').textContent=ds;
+  document.getElementById('so').textContent=style+' · AI';
+  document.getElementById('sde').textContent=desc.length>120?desc.slice(0,120)+'...':desc;
+  document.getElementById('res').classList.add('show');
+  document.getElementById('res').scrollIntoView({behavior:'smooth'});
+}
+</script>
 </body>
 </html>
