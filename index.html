@@ -41,7 +41,7 @@ input:focus{border-color:rgba(167,139,250,0.4)}
 .btn{width:100%;padding:14px;background:linear-gradient(135deg,rgba(99,102,241,0.8),rgba(139,92,246,0.8));color:#fff;border:1px solid rgba(167,139,250,0.3);border-radius:12px;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500}
 .result{display:none}
 .result.show{display:block}
-.loading{text-align:center;padding:24px;color:rgba(167,139,250,0.7);font-size:13px;display:none}
+.loading{text-align:center;padding:20px;color:rgba(167,139,250,0.7);font-size:13px;display:none}
 .loading.show{display:block}
 .preview{display:flex;gap:8px;align-items:stretch}
 .holes{display:flex;flex-direction:column;gap:16px;justify-content:center}
@@ -49,9 +49,8 @@ input:focus{border-color:rgba(167,139,250,0.4)}
 .pcard{flex:1;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:14px;display:grid;grid-template-columns:3fr 2fr;min-height:200px;overflow:hidden}
 .art{background:linear-gradient(135deg,rgba(91,33,182,0.4),rgba(67,56,202,0.3));display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
 .art img{width:100%;height:100%;object-fit:cover}
-.art-placeholder{display:flex;flex-direction:column;align-items:center;gap:8px}
 .art-orb{width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,0.6),rgba(99,102,241,0.2))}
-.art-tag{font-size:9px;color:rgba(167,139,250,0.7);letter-spacing:1.5px;text-transform:uppercase}
+.art-tag{font-size:9px;color:rgba(167,139,250,0.7);letter-spacing:1.5px;text-transform:uppercase;margin-top:8px}
 .info{padding:14px;display:flex;flex-direction:column;justify-content:space-between}
 .sno{font-size:9px;color:rgba(255,255,255,0.2);letter-spacing:2px;text-transform:uppercase}
 .stitle{font-size:14px;color:#f0ebff;font-weight:500;margin:5px 0}
@@ -100,17 +99,15 @@ input:focus{border-color:rgba(167,139,250,0.4)}
     </div>
     <button class="btn" onclick="gen()">✦ Создать карточку сна</button>
   </div>
-  <div class="loading" id="loading">⟳ Генерируем AI-арт... (~30 сек)</div>
+  <div class="loading" id="loading">✦ Генерируем AI-арт... подожди ~30 сек</div>
   <div class="result card glass" id="res">
     <div class="lbl">Твоя карточка</div>
     <div class="preview">
       <div class="holes"><div class="hole"></div><div class="hole"></div></div>
       <div class="pcard">
         <div class="art" id="art-zone">
-          <div class="art-placeholder">
-            <div class="art-orb"></div>
-            <div class="art-tag" id="so">Аниме · AI</div>
-          </div>
+          <div class="art-orb"></div>
+          <div class="art-tag" id="so">Аниме · AI</div>
         </div>
         <div class="info">
           <div>
@@ -132,20 +129,20 @@ input:focus{border-color:rgba(167,139,250,0.4)}
   </div>
 </div>
 <script>
-const REPLICATE_KEY = '';
-const STYLE_PROMPTS = {
-  anime: 'anime style illustration, dream scene, soft lighting, detailed, Studio Ghibli inspired, beautiful colors',
-  arthaus: 'arthouse film still, cinematic, artistic, moody lighting, film grain, avant-garde',
-  cyberpunk: 'cyberpunk neon city, futuristic, neon lights, rain, dark atmosphere, blade runner style',
-  watercolor: 'watercolor painting, soft dreamy colors, flowing paint, artistic, gentle',
-  surreal: 'surrealist painting, Salvador Dali inspired, dreamlike, impossible architecture, vivid colors'
+const WORKER='https://dreamcard-api.realign756332.workers.dev';
+const PROMPTS={
+  anime:'anime style illustration, Studio Ghibli inspired, soft lighting, beautiful colors, detailed, dreamy atmosphere',
+  arthaus:'arthouse cinematic, moody lighting, film grain, artistic, avant-garde, dramatic shadows',
+  cyberpunk:'cyberpunk neon city, futuristic, neon lights, rain reflections, dark atmosphere, blade runner style',
+  watercolor:'delicate watercolor painting, soft dreamy colors, flowing paint, artistic, gentle brushstrokes',
+  surreal:'surrealist painting, Salvador Dali inspired, dreamlike impossible architecture, vivid colors, fantasy'
 };
 let style='anime';
 let imgUrl='';
 document.getElementById('dd').value=new Date().toISOString().split('T')[0];
 function pick(el,s){document.querySelectorAll('.sty').forEach(b=>b.classList.remove('on'));el.classList.add('on');style=s;}
 async function gen(){
-  const desc=document.getElementById('dt').value||'a beautiful dream';
+  const desc=document.getElementById('dt').value||'a beautiful dream landscape';
   const n=document.getElementById('dn').value||'1';
   const t=document.getElementById('dti').value||'Без названия';
   const d=document.getElementById('dd').value;
@@ -157,24 +154,17 @@ async function gen(){
   document.getElementById('sde').textContent=desc.length>120?desc.slice(0,120)+'...':desc;
   document.getElementById('loading').classList.add('show');
   document.getElementById('res').classList.remove('show');
-  const prompt=desc+', '+STYLE_PROMPTS[style]+', high quality, 4k, no text, no watermark';
+  const prompt=desc+', '+PROMPTS[style]+', high quality, 4k, no text, no watermark, no people';
   try{
-    const r=await fetch('https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions',{
+    const r=await fetch(WORKER,{
       method:'POST',
-      headers:{'Authorization':'Token '+REPLICATE_KEY,'Content-Type':'application/json'},
-      body:JSON.stringify({input:{prompt:prompt,num_outputs:1,aspect_ratio:'16:9',output_format:'webp',output_quality:90}})
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt})
     });
-    const data=await r.json();
-    let prediction=data;
-    while(prediction.status!=='succeeded'&&prediction.status!=='failed'){
-      await new Promise(res=>setTimeout(res,2000));
-      const poll=await fetch('https://api.replicate.com/v1/predictions/'+prediction.id,{headers:{'Authorization':'Token '+REPLICATE_KEY}});
-      prediction=await poll.json();
-    }
-    if(prediction.status==='succeeded'&&prediction.output){
-      imgUrl=prediction.output[0];
-      const artZone=document.getElementById('art-zone');
-      artZone.innerHTML='<img src="'+imgUrl+'" style="width:100%;height:100%;object-fit:cover">';
+    const pred=await r.json();
+    if(pred.status==='succeeded'&&pred.output){
+      imgUrl=pred.output[0];
+      document.getElementById('art-zone').innerHTML='<img src="'+imgUrl+'" style="width:100%;height:100%;object-fit:cover">';
       document.getElementById('dlbtn').onclick=()=>{const a=document.createElement('a');a.href=imgUrl;a.download='dreamcard.webp';a.click()};
     }
   }catch(e){console.log(e)}
