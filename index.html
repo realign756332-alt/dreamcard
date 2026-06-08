@@ -60,6 +60,7 @@ input:focus{border-color:rgba(167,139,250,0.4)}
 .dl{width:100%;padding:10px;background:transparent;border:1px solid rgba(167,139,250,0.2);color:rgba(167,139,250,0.7);border-radius:10px;font-size:11px;cursor:pointer;margin-top:10px;font-family:'Inter',sans-serif}
 .trust{display:flex;justify-content:center;gap:20px;padding:16px 0;border-top:1px solid rgba(255,255,255,0.05);margin-top:4px;flex-wrap:wrap}
 .ti{font-size:10px;color:rgba(255,255,255,0.2)}
+.err{color:#f87171;font-size:12px;text-align:center;padding:8px}
 </style>
 </head>
 <body>
@@ -101,6 +102,7 @@ input:focus{border-color:rgba(167,139,250,0.4)}
     <button class="btn" id="genbtn" onclick="gen()">✦ Создать карточку сна</button>
   </div>
   <div class="loading" id="loading">✦ Генерируем AI-арт... <span id="timer">0</span> сек</div>
+  <div class="err" id="errmsg"></div>
   <div class="result card glass" id="res">
     <div class="lbl">Твоя карточка</div>
     <div class="preview">
@@ -132,11 +134,11 @@ input:focus{border-color:rgba(167,139,250,0.4)}
 <script>
 const WORKER='https://dreamcard-api.realign756332.workers.dev';
 const PROMPTS={
-  anime:'anime style illustration, Studio Ghibli inspired, soft lighting, beautiful colors, detailed, dreamy atmosphere, no people, no humans',
-  arthaus:'arthouse cinematic, moody lighting, film grain, artistic, avant-garde, dramatic shadows, no people',
-  cyberpunk:'cyberpunk neon city, futuristic, neon lights, rain reflections, dark atmosphere, blade runner style, no people',
-  watercolor:'delicate watercolor painting, soft dreamy colors, flowing paint, artistic, gentle brushstrokes, no people',
-  surreal:'surrealist painting, Salvador Dali inspired, dreamlike impossible architecture, vivid colors, fantasy, no people'
+  anime:'anime style illustration, Studio Ghibli inspired, soft lighting, beautiful colors, detailed, dreamy atmosphere',
+  arthaus:'arthouse cinematic, moody lighting, film grain, artistic, avant-garde, dramatic shadows',
+  cyberpunk:'cyberpunk neon city, futuristic, neon lights, rain reflections, dark atmosphere, blade runner style',
+  watercolor:'delicate watercolor painting, soft dreamy colors, flowing paint, artistic, gentle brushstrokes',
+  surreal:'surrealist painting, Salvador Dali inspired, dreamlike impossible architecture, vivid colors, fantasy'
 };
 let style='anime';
 let secs=0;
@@ -156,31 +158,33 @@ async function gen(){
   document.getElementById('sde').textContent=desc.length>120?desc.slice(0,120)+'...':desc;
   document.getElementById('loading').classList.add('show');
   document.getElementById('res').classList.remove('show');
+  document.getElementById('errmsg').textContent='';
   document.getElementById('genbtn').disabled=true;
   secs=0;
   timerInt=setInterval(()=>{secs++;document.getElementById('timer').textContent=secs;},1000);
   const prompt=desc+', '+PROMPTS[style]+', high quality, 4k, no text, no watermark';
   try{
-    const r=await fetch(WORKER+'/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
-    const {id}=await r.json();
-    let imgUrl='';
-    for(let i=0;i<40;i++){
-      await new Promise(res=>setTimeout(res,3000));
-      const p=await fetch(WORKER+'/check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});
-      const pred=await p.json();
-      if(pred.status==='succeeded'&&pred.output){imgUrl=pred.output[0];break;}
-      if(pred.status==='failed')break;
+    const r=await fetch(WORKER+'/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt})
+    });
+    const data=await r.json();
+    if(data.error){
+      document.getElementById('errmsg').textContent='Ошибка: '+data.error;
+    } else if(data.image){
+      const imgSrc='data:image/jpeg;base64,'+data.image;
+      document.getElementById('art-zone').innerHTML='<img src="'+imgSrc+'" style="width:100%;height:100%;object-fit:cover">';
+      document.getElementById('dlbtn').onclick=()=>{const a=document.createElement('a');a.href=imgSrc;a.download='dreamcard.jpg';a.click()};
+      document.getElementById('res').classList.add('show');
+      document.getElementById('res').scrollIntoView({behavior:'smooth'});
     }
-    if(imgUrl){
-      document.getElementById('art-zone').innerHTML='<img src="'+imgUrl+'" style="width:100%;height:100%;object-fit:cover">';
-      document.getElementById('dlbtn').onclick=()=>{const a=document.createElement('a');a.href=imgUrl;a.download='dreamcard.webp';a.click()};
-    }
-  }catch(e){console.log(e)}
+  }catch(e){
+    document.getElementById('errmsg').textContent='Ошибка соединения. Попробуй снова.';
+  }
   clearInterval(timerInt);
   document.getElementById('loading').classList.remove('show');
-  document.getElementById('res').classList.add('show');
   document.getElementById('genbtn').disabled=false;
-  document.getElementById('res').scrollIntoView({behavior:'smooth'});
 }
 </script>
 </body>
